@@ -1,0 +1,44 @@
+Mono path[0] = 'F:/Unity3d/MemoryGame/MemoryGame_Data/Managed'
+Mono path[1] = 'F:/Unity3d/MemoryGame/MemoryGame_Data/Mono'
+Mono config path = 'F:/Unity3d/MemoryGame/MemoryGame_Data/Mono/etc'
+PlayerConnection initialized from F:/Unity3d/MemoryGame/MemoryGame_Data (debug = 0)
+PlayerConnection initialized network socket : 0.0.0.0 55331
+Multi-casting "[IP] 192.168.1.146 [Port] 55331 [Flags] 2 [Guid] 151736677 [EditorId] 3074671502 [Version] 1048832 [Id] WindowsPlayer(XgreshnikX-PC) [Debug] 0" to [225.0.0.222:54997]...
+PlayerConnection already initialized - listening to [192.168.1.146:55331]
+Initialize engine version: 5.3.5f1 (960ebf59018a)
+GfxDevice: creating device client; threaded=1
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.0]
+    Renderer: NVIDIA GeForce GT 650M   (ID=0xfd1)
+    Vendor:   NVIDIA
+    VRAM:     1990 MB
+Begin MonoManager ReloadAssembly
+Platform assembly: F:\Unity3d\MemoryGame\MemoryGame_Data\Managed\UnityEngine.dll (this message is harmless)
+Loading F:\Unity3d\MemoryGame\MemoryGame_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: F:\Unity3d\MemoryGame\MemoryGame_Data\Managed\Assembly-CSharp.dll (this message is harmless)
+Loading F:\Unity3d\MemoryGame\MemoryGame_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
+Platform assembly: F:\Unity3d\MemoryGame\MemoryGame_Data\Managed\UnityEngine.UI.dll (this message is harmless)
+Loading F:\Unity3d\MemoryGame\MemoryGame_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
+Platform assembly: F:\Unity3d\MemoryGame\MemoryGame_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
+Loading F:\Unity3d\MemoryGame\MemoryGame_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
+- Completed reload, in  0.132 seconds
+Platform assembly: F:\Unity3d\MemoryGame\MemoryGame_Data\Managed\System.Core.dll (this message is harmless)
+Platform assembly: F:\Unity3d\MemoryGame\MemoryGame_Data\Managed\System.dll (this message is harmless)
+desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
+<RI> Initializing input.
+<RI> Input initialized.
+desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
+<RI> Initialized touch support.
+UnloadTime: 1.295824 ms
+Loaded images count: 6
+UnityEngine.DebugLogHandler:Internal_Log(LogType, String, Object)
+UnityEngine.DebugLogHandler:LogFormat(LogType, Object, String, Object[])
+UnityEngine.Logger:Log(LogType, Object)
+UnityEngine.Debug:LogWarning(Object)
+<LoadImages>c__Iterator0:MoveNext() (at F:\Unity3d\MemoryGame\Assets\Scripts\CardManager.cs:141)
+ 
+(Filename: F:/Unity3d/MemoryGame/Assets/Scripts/CardManager.cs Line: 141)
+
+Setting up 2 worker threads for Enlighten.
+  Thread -> id: 26e0 -> priority: 1 
+  Thread -> id: 273c -> priority: 1 
