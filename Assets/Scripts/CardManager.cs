@@ -1,164 +1,150 @@
-﻿using System;
+﻿using Assets.Classes;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
+using Random = UnityEngine.Random;
 
 public class CardManager : MonoBehaviour
 {
-    private const int DefaultCount = 6;
-    private int _cardsCount = DefaultCount;
+    private const float Delay = 0.5f;
+    
+    private int _matches;
+    private Stopwatch _time;
 
-    //private bool _isInitialized;
+    private int _cardsCount;    
     private ImageSource _source;
 
-    public GameObject[] Cards;
+    public List<GameObject> Cards;
 
-    public void SetCardsCount(InputField field)
-    {
-        if (field == null)
-        {
-            return;
-        }
-        
-        int count;
-        if (!int.TryParse(field.text, out count))
-        {
-            return;
-        }
+    public GameObject PrefabCard;
+    public GameObject GridPanel;
+    public GameObject Status;
 
-        if (count >= 1)
-        {
-            _cardsCount = count;
-            StartCoroutine(_source.LoadImages(_cardsCount));
-        }
-        else
-        {
-            field.text = (_cardsCount = DefaultCount).ToString();
-        }
+    public void StartGame()
+    {   
+        _matches = 0;
+        _source = new ImageSource();
+
+        Status.GetComponent<Text>().text = string.Empty;
+
+        StartCoroutine(InitializeCards());
     }
 
-    private void Awake()
+    public void SetCardsCount(int count)
     {
-        _source = new ImageSource();
+        if (count <= 0)
+        {
+            Debug.LogWarning("Required cards count must be positive ");
+            return;
+        }
+
+        _cardsCount = count;
+    }
+    
+    public IEnumerator CheckField()
+    {
+        yield return new WaitForSeconds(Delay);
+
+        List<int> shownCards = Cards
+            .Where(card => card != null && card.GetComponent<Card>().IsShown && !card.GetComponent<Card>().IsDestroyed)
+            .Select(card => card.GetComponent<Card>().Number)
+            .ToList();
+
+        if (shownCards.Count == 2 && shownCards[0] == shownCards[1])
+        {
+            foreach (var card in Cards.Where(card => card != null && card.GetComponent<Card>().IsShown))
+            {
+                card.GetComponent<Card>().IsDestroyed = true;
+                Destroy(card);
+            }
+
+            Cards.RemoveAll(x => x != null && x.GetComponent<Card>().Number == shownCards[0]);
+            
+            Status.GetComponent<Text>().text = string.Format(Messages.MatchesFormat, ++_matches);
+        }
+        else if (shownCards.Count == 2)
+        {
+            foreach (var card in Cards.Where(card => card != null && card.GetComponent<Card>().IsShown))
+            {
+                card.GetComponent<Card>().FlipCard(false);
+            }
+        }
+
+        if (Cards.Count == 0)
+        {
+            _time.Stop();
+            Status.GetComponent<Text>().text = 
+                string.Format(Messages.WinMessageFormat, _matches, _time.Elapsed.Hours, _time.Elapsed.Minutes, _time.Elapsed.Seconds);
+        }
     }
 
     private void Start()
     {
-        StartCoroutine(_source.LoadImages(_cardsCount));
+        Cards = new List<GameObject>();
+
+        _time = new Stopwatch();
     }
 
-    private void Update()
+    private IEnumerator InitializeCards()
     {
-        if (_source.IsLoaded)
+        yield return _source.LoadImages(_cardsCount);
+
+        if (Cards.Any())
         {
-            InitializeCards();
-        }
-    }
-
-    private void InitializeCards()
-    {
-        var texture = _source.Images.Last();
-        Cards[0].GetComponent<Card>().CardFront = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
-            new Vector2(0.5f, 0.5f));
-        //for (var i = 0; i < 2; i++)
-        //{
-        //    for (var j = 0; j < _cardsCount; j++)
-        //    {
-        //        var isInitialized = true;
-        //        var position = 0;
-
-        //        while (isInitialized)
-        //        {
-        //            position = Random.Range(0, Cards.Length);
-        //            isInitialized = (Cards[position].GetComponent<Card>().IsInitialized);
-        //        }
-
-        //        Cards[position].GetComponent<Card>().Number = j;
-        //        Cards[position].GetComponent<Card>().IsInitialized = true;
-        //    }
-        //}
-
-        //foreach (var card in Cards)
-        //{
-        //    card.GetComponent<Card>().SetUp();
-        //}
-
-        //_isInitialized = true;
-    }
-
-    private void Check()
-    {
-        var shownCards = Cards
-            .Where(card => card.GetComponent<Card>().IsShown)
-            .Select(card => card.GetComponent<Card>())
-            .ToList();
-
-        if (shownCards.Count == 2 && shownCards[0].Number == shownCards[1].Number)
-        {
-        }
-    }
-}
-
-internal class ImageSource
-{
-    private readonly List<Texture2D> _images = new List<Texture2D>();
-
-    public bool IsLoaded { get; private set; }
-
-    public List<Texture2D> Images
-    {
-        get { return _images; }
-    }
-
-    public IEnumerator LoadImages(int count)
-    {
-        if (count <= 0)
-        {
-            Debug.LogWarning("Required images count must be positive ");
-            yield break;
-        }
-
-        IsLoaded = false;
-
-        var www = new WWW(string.Format("{0}/{1}", DataAccess.WebUrlString, DataAccess.ImgSourceFileName));
-        yield return www;
-
-        if (www.error != null)
-        {
-            Debug.LogError("Error .. " + www.error);
-            yield break;
-        }
-
-        Images.Clear();
-
-        var links = www.text.Split(new[] {"\r", "\n", " "}, StringSplitOptions.RemoveEmptyEntries).Take(count).ToList();
-        yield return LoadImages(links);
-
-        IsLoaded = true;
-
-        Debug.LogWarning("Loaded images count: " + Images.Count);
-    }
-
-    private IEnumerator LoadImages(IList<string> links)
-    {
-        foreach (var link in links)
-        {
-            var www = new WWW(string.Format("{0}/{1}", DataAccess.WebUrlString, link));
-            yield return www;
-
-            if (www.error == null)
+            foreach (var card in Cards)
             {
-                Images.Add(www.texture);
+                Destroy(card);
             }
+
+            Cards.Clear();
+        }
+
+        for (var i = 0; i < _source.Images.Count; i++)
+        {
+            InitializeCard(i, Instantiate(PrefabCard));
+            InitializeCard(i, Instantiate(PrefabCard));
+        }
+
+        if (_time != null)
+        {
+            _time.Reset();
+            _time.Start();
         }
     }
-}
 
-internal class DataAccess
-{
-    public static string WebUrlString = @"http://www.novility.com/interview";
+    private void InitializeCard(int number, GameObject instance)
+    {
+        var distanceX = 400; //TODO: calculate this value based on size of Parent
+        var distanceY = 300;
 
-    public static string ImgSourceFileName = @"list.txt";
+        var frontSprite = Sprite.Create(_source.Images[number], new Rect(0, 0, _source.Images[number].width, _source.Images[number].height), new Vector2(0.5f, 0.5f));
+
+        instance.GetComponent<Card>().CardFront = frontSprite;
+        instance.GetComponent<Card>().Number = number;
+
+        instance.GetComponent<Card>().Manager = gameObject;
+
+        instance.transform.SetParent(GridPanel.transform, false);
+        instance.transform.localPosition = new Vector3(Random.Range(distanceX * -1, distanceX), Random.Range(distanceY * -1, distanceY), 0);
+
+        instance.AddComponent(typeof(BoxCollider2D));
+        instance.GetComponent<BoxCollider2D>().size = new Vector3(frontSprite.rect.width, frontSprite.rect.height, 0);
+
+        for (var i = 0; i < 10000; i++)
+        {
+            if (Cards.Any(c => c.GetComponent<BoxCollider2D>().bounds.Intersects(instance.GetComponent<BoxCollider2D>().bounds)))
+            {
+                instance.transform.localPosition = new Vector3(Random.Range(distanceX * -1, distanceX), Random.Range(distanceY * -1, distanceY), 0);
+                continue;
+            }
+
+            break;
+        }
+
+        Cards.Add(instance);
+    }
 }
