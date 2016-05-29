@@ -21,6 +21,12 @@ public class InputValidation : MonoBehaviour
 
     private void Input(InputField field)
     {
+        if (string.IsNullOrEmpty(field.text))
+        {
+            Manager.GetComponent<CardManager>().SetCardsCount(DefaultCount / 2);
+            return;
+        }
+
         int count;
 
         if (!int.TryParse(field.text, out count))
@@ -32,7 +38,7 @@ public class InputValidation : MonoBehaviour
             return;
         }
         
-        if (count % 2 == 0 && count != 0)
+        if (count % 2 == 0 && count > 0)
         {
             Manager.GetComponent<CardManager>().SetCardsCount(count / 2);
             StartButton.GetComponent<Button>().interactable = true;

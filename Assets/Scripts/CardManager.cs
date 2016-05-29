@@ -10,9 +10,10 @@ using Random = UnityEngine.Random;
 
 public class CardManager : MonoBehaviour
 {
-    private const float Delay = 0.5f;
-    
-    private int _matches;
+    private const float Delay = 0.2f;
+    private bool _isInitializing;
+
+    private int _steps;
     private Stopwatch _time;
 
     private int _cardsCount;    
@@ -25,8 +26,14 @@ public class CardManager : MonoBehaviour
     public GameObject Status;
 
     public void StartGame()
-    {   
-        _matches = 0;
+    {
+        if (_isInitializing)
+        {
+            return;
+        }
+
+        _isInitializing = true;
+        _steps = 0;
         _source = new ImageSource();
 
         Status.GetComponent<Text>().text = string.Empty;
@@ -36,7 +43,7 @@ public class CardManager : MonoBehaviour
 
     public void SetCardsCount(int count)
     {
-        if (count <= 0)
+        if (count < 0)
         {
             Debug.LogWarning("Required cards count must be positive ");
             return;
@@ -48,6 +55,8 @@ public class CardManager : MonoBehaviour
     public IEnumerator CheckField()
     {
         yield return new WaitForSeconds(Delay);
+
+        Status.GetComponent<Text>().text = string.Format(Messages.StepsFormat, ++_steps);
 
         List<int> shownCards = Cards
             .Where(card => card != null && card.GetComponent<Card>().IsShown && !card.GetComponent<Card>().IsDestroyed)
@@ -63,8 +72,6 @@ public class CardManager : MonoBehaviour
             }
 
             Cards.RemoveAll(x => x != null && x.GetComponent<Card>().Number == shownCards[0]);
-            
-            Status.GetComponent<Text>().text = string.Format(Messages.MatchesFormat, ++_matches);
         }
         else if (shownCards.Count == 2)
         {
@@ -78,7 +85,7 @@ public class CardManager : MonoBehaviour
         {
             _time.Stop();
             Status.GetComponent<Text>().text = 
-                string.Format(Messages.WinMessageFormat, _matches, _time.Elapsed.Hours, _time.Elapsed.Minutes, _time.Elapsed.Seconds);
+                string.Format(Messages.WinMessageFormat, _steps, _time.Elapsed.Hours, _time.Elapsed.Minutes, _time.Elapsed.Seconds);
         }
     }
 
@@ -87,6 +94,17 @@ public class CardManager : MonoBehaviour
         Cards = new List<GameObject>();
 
         _time = new Stopwatch();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKey(KeyCode.KeypadEnter) || Input.GetKey("enter") || Input.GetKey("return"))
+        {
+            if (_cardsCount > 0)
+            {
+                StartGame();
+            }
+        }
     }
 
     private IEnumerator InitializeCards()
@@ -108,12 +126,14 @@ public class CardManager : MonoBehaviour
             InitializeCard(i, Instantiate(PrefabCard));
             InitializeCard(i, Instantiate(PrefabCard));
         }
-
+        
         if (_time != null)
         {
             _time.Reset();
             _time.Start();
         }
+
+        _isInitializing = false;
     }
 
     private void InitializeCard(int number, GameObject instance)

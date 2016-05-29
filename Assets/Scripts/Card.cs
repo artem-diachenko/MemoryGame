@@ -14,12 +14,15 @@ public class Card : MonoBehaviour
     
     public void FlipCard(bool checkFieldRequired)
     {
+        
+
         GetComponent<Image>().sprite = IsShown ? CardBack : CardFront;
         IsShown = !IsShown;
 
         if (checkFieldRequired)
         {
             StartCoroutine(Manager.GetComponent<CardManager>().CheckField());
+            GetComponent<AudioSource>().Play();
         }
     }
 
